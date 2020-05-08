@@ -1,0 +1,24 @@
+version: 0.1
+phases:
+    install:
+        commands:
+            - 'touch .npmignore'
+            - 'npm install -g yarn'
+    pre_build:
+        commands:
+            - 'npm install'
+    build:
+        commands:
+            - 'npm run build'
+    post_build:
+        commands:
+            - 'echo ${BUCKET_NAME}'
+            - 'echo ${DISTRIBUTION_ID}'
+            - 'aws s3 sync "build/" "s3://${BUCKET_NAME}" --delete'
+            - 'aws s3 sync "s3://config.scilicet.app/${ENVIRONMENT}" "s3://${BUCKET_NAME}"'
+            - 'aws cloudfront create-invalidation --distribution-id "${DISTRIBUTION_ID}" --paths "/*"'
+artifacts:
+    base-directory: public
+    files:
+        - '**/*'
+    discard-paths: yes

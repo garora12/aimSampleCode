@@ -1,0 +1,5 @@
+{
+	"testMatch": [
+		"**/__integrationtests__/**/*.spec.js"
+	]
+}

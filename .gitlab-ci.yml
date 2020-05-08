@@ -1,0 +1,97 @@
+variables:
+  GIT_STRATEGY: fetch
+  GIT_DEPTH: "2"
+
+stages:
+  - build
+  - deploy_dev
+  - deploy_qa
+
+before_script:
+  - whoami
+#  - mkdir -p ~/.ssh
+#   - touch ~/.ssh/config
+#   - cat >> ~/.ssh/config  << EOF
+#       VerifyHostKeyDNS yes
+#       StrictHostKeyChecking no
+#     EOF
+#   - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+#     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+#   - apt-get update && apt-get install yarn
+#  - sudo npm install -g babel-cli
+#  - yarn install
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+  - node_modules/
+
+build_code:
+  stage: build
+  script:
+    # - git tag $CI_JOB_ID
+    # - git push --tags
+    #- bin/set-version build -n $CI_JOB_ID
+    - sudo npm install -g babel-cli
+    - sudo npm install -g react-scripts jest-cli
+    - whoami
+    - sudo yarn install
+    - sudo yarn test
+    - sudo npm run build --silent || true
+    - sudo tar -czvf $CI_PROJECT_DIR/build.tar.gz -C $CI_PROJECT_DIR/build .
+    - sudo chown -R gitlab-runner:gitlab-runner build
+    - sudo chown -R gitlab-runner:gitlab-runner node_modules
+  artifacts:
+    name: "${CI_JOB_ID}_build_tar"
+    paths:
+      - $CI_PROJECT_DIR/build.tar.gz
+    when: on_success
+    expire_in: 1 week
+  only:
+    - develop
+  allow_failure: false
+  tags:
+    - aims-deploy-runner
+
+
+deploy_dev:
+  stage: deploy_dev
+  script:
+    - sudo ssh aim@192.241.138.116 "rm -rf /home/aim/build.tar.*" || true
+    - sudo scp $CI_PROJECT_DIR/build.tar.gz aim@192.241.138.116:/home/aim
+    - sudo ssh aim@192.241.138.116 "rm -rf /home/aim/aim-webapp/build"
+    - sudo ssh aim@192.241.138.116 "mkdir -p /home/aim/aim-webapp/build"
+    - sudo ssh aim@192.241.138.116 "tar xvC /home/aim/aim-webapp/build -f /home/aim/build.tar.gz"
+    - sudo ssh aim@192.241.138.116 "sudo service nginx restart"
+    - sudo ssh aim@192.241.138.116 "mv build.tar.gz build.tar.gz.$CI_JOB_ID"
+  only:
+    - develop
+  allow_failure: false
+  dependencies:
+    - build_code
+  environment:
+    name: DEV
+  tags:
+    - aims-deploy-runner
+
+deploy_qa:
+  stage: deploy_qa
+  script:
+    - sudo ssh aim@68.183.105.208 "rm -rf /home/aim/build.tar.*"
+    - sudo ssh aim@68.183.105.208 "rm -rf /home/aim/build.tar.*" || true
+    - sudo scp $CI_PROJECT_DIR/build.tar.gz aim@68.183.105.208:/home/aim
+    - sudo ssh aim@68.183.105.208 "rm -rf /home/aim/aim-webapp/build"
+    - sudo ssh aim@68.183.105.208 "mkdir -p /home/aim/aim-webapp/build"
+    - sudo ssh aim@68.183.105.208 "tar xvC /home/aim/aim-webapp/build -f /home/aim/build.tar.gz"
+    - sudo ssh aim@68.183.105.208 "sudo service nginx restart"
+    - sudo ssh aim@68.183.105.208 "mv build.tar.gz build.tar.gz.$CI_JOB_ID"
+  only:
+    - develop
+  allow_failure: true
+  dependencies:
+    - build_code
+  when: manual
+  environment:
+    name: QA
+  tags:
+    - aims-deploy-runner

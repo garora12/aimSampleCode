@@ -1,0 +1,35 @@
+#!/usr/bin/env babel-node
+ // --debug-brk
+
+const fs = require('fs')
+const parsedArgs = require('minimist')(process.argv.slice(2)),
+	_ = require("lodash"),
+	path = require("path")
+
+const target = parsedArgs._;
+
+function usage() {
+	console.log("missing target, ex:")
+	console.log("  build -n 1200")
+	console.log("  bump")
+}
+if (target == "build") {
+	var number = parsedArgs.n
+	const filename = path.resolve(__dirname, "../package.json")
+	const packageObj = JSON.parse(fs.readFileSync(filename))
+	const [major,minor,patch] = packageObj.version.split(".")
+	packageObj.version = `${major}.${minor}.${number}`
+	fs.writeFileSync(filename, JSON.stringify(packageObj, null, 2))
+	console.log(`set version to ${packageObj.version}`)
+} else if (target == "bump") {
+	const filename = path.resolve(__dirname, "../package.json")
+	const packageObj = JSON.parse(fs.readFileSync(filename))
+	const [major,minor,patch] = packageObj.version.split(".")
+	const number = parseInt(patch) + 1
+	packageObj.version = `${major}.${minor}.${number}`
+	fs.writeFileSync(filename, JSON.stringify(packageObj, null, 2))
+	console.log(`set version to ${packageObj.version}`)
+} else {
+	usage();
+	process.exit(0)
+}

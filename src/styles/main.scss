@@ -1,0 +1,21 @@
+body {
+	background: #f7f7f7 !important;
+	// font-family: Roboto;
+}
+
+@import "vendors/fonts";
+@import "config/variable";
+@import "base/normalize",
+        "base/typography";
+
+@import "pages/home";
+@import "pages/scilicet_redirect_page";
+@import "components/form",
+        "components/login";
+
+@import "components/loggedInLayout.scss";
+@import "components/staticFiles.sass";
+@import "components/header.sass";
+@import "components/tables.sass";
+
+
