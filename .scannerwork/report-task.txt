@@ -1,6 +1,0 @@
-projectKey=Aim-Frontend
-serverUrl=http://sonar.seasiainfotech.com:9000
-serverVersion=8.1.0.31237
-dashboardUrl=http://sonar.seasiainfotech.com:9000/dashboard?id=Aim-Frontend
-ceTaskId=AXB8RNBVz3H8oiBKjQuH
-ceTaskUrl=http://sonar.seasiainfotech.com:9000/api/ce/task?id=AXB8RNBVz3H8oiBKjQuH

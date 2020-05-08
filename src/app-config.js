@@ -6,14 +6,10 @@ if (window.AimAppConfig) {
 }
 
 const defaults = {
-	//API_URL: 'http://localhost:3005',
-	API_URL: 'https://api-qa.scilicet.app',
-	//API_URL: 'https://api.aimincentives.net',
-	NEW_APP_URL: 'https://qa.scilicet.app/',
+	API_URL: 'https://api-qa.******',,
 	ALLOW_REDIRECT:false,
 	LOGOUT_SESSION_TIMEOUT: 60 * 60 * 1000,
 	AUTO_LOGOUT_SESSION_TIMEOUT: 30 * 1000,
-	// API_URL:'https://api-dev.aimrebates.com',
 	version: "1.0.4",
 	snackbarHideTime: 30000,
 	isOperator: true,
